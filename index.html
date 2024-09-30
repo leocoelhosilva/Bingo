@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo, amigos do Bichão</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Remove as barras de rolagem */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #333; /* Cor chumbo */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        h1 {
+            margin: 0 10px; /* Espaço entre a imagem e o título */
+            font-size: 2.5em;
+            color: #0088cc;
+            text-align: center;
+        }
+
+        .input-number {
+            margin-left: 10px; /* Espaço à esquerda do campo de entrada */
+            padding: 10px;
+            font-size: 1.2em;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .bingo-container {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            width: 80vw; /* Ocupa 80% da largura da tela */
+            max-width: 1000px; /* Limita a largura máxima */
+            margin: auto; /* Centraliza o container */
+        }
+
+        .bingo-number {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            background-color: #fff;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            font-size: 1.5em;
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            font-family: 'Courier New', monospace; /* Alteração na fonte dos números */
+            font-weight: bold; /* Números em negrito */
+        }
+
+        .bingo-number.active {
+            background-color: red; /* Botão acende em vermelho */
+            color: white;
+            border: 2px solid darkred;
+        }
+
+        .bingo-number:hover {
+            background-color: #ddd;
+        }
+
+        .reset-button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background-color: #ff9800;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 10px; /* Espaço à direita do botão */
+        }
+
+        .reset-button:hover {
+            background-color: #e68900;
+        }
+
+        .premiacao-container {
+            position: absolute;
+            left: 20px;
+            top: 50px;
+            width: 120px;
+        }
+
+        .premiacao-container h2 {
+            color: white; /* Cor branca para o título das premiações */
+        }
+
+        .premiacao-container ul {
+            list-style-type: none;
+            padding: 0;
+            font-size: 1.2em;
+        }
+
+        .premiacao-container li {
+            background-color: #ddd;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .premiacao-container li:hover {
+            background-color: #ccc;
+        }
+
+        .img-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .img-container img {
+            width: 100px; /* Tamanho do ícone */
+            height: auto;
+        }
+
+        @media (max-width: 600px) {
+            .bingo-number {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .bingo-container {
+                grid-template-columns: repeat(5, 1fr);
+                width: 100%; /* Para telas menores */
+            }
+
+            .premiacao-container {
+                position: static;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+        }
+
+        .controls-container {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            bottom: 20px; /* Alinha ao fundo */
+            right: 20px; /* Alinha à direita */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="img-container">
+            <img src="https://cdn-icons-png.flaticon.com/512/2203/2203768.png" alt="Imagem de bingo">
+        </div>
+        <h1>Bingo, amigos do Bichão</h1>
+    </div>
+
+    <!-- Container de premiações -->
+    <div class="premiacao-container">
+        <h2>Premiações</h2>
+        <ul id="premiacoes-lista">
+            <li>Quatro Pontas</li>
+            <li>Quina 1</li>
+            <li>Quina 2</li>
+            <li>Cartela Cheia</li>
+        </ul>
+    </div>
+
+    <!-- Container de números do bingo -->
+    <div class="bingo-container">
+        <!-- Números do bingo gerados via JavaScript -->
+    </div>
+
+    <div class="controls-container">
+        <button class="reset-button">Novo</button>
+        <input type="number" class="input-number" id="number-input" placeholder="Digite um número" min="1" max="75">
+    </div>
+
+    <script>
+        // Seleciona o container onde os números serão colocados
+        const bingoContainer = document.querySelector('.bingo-container');
+        const resetButton = document.querySelector('.reset-button');
+        const premiacoesLista = document.getElementById('premiacoes-lista');
+        const numberInput = document.getElementById('number-input');
+
+        // Gera os números de 1 a 75
+        for (let i = 1; i <= 75; i++) {
+            const numberElement = document.createElement('div');
+            numberElement.classList.add('bingo-number');
+            numberElement.textContent = i;
+
+            // Adiciona o evento de clique para acender/apagar o número
+            numberElement.addEventListener('click', function () {
+                this.classList.toggle('active'); // Alterna a classe 'active' para acender/apagar
+            });
+
+            bingoContainer.appendChild(numberElement);
+        }
+
+        // Função de reset das marcações
+        resetButton.addEventListener('click', function() {
+            const confirmation = confirm('Tem certeza que deseja resetar todas as marcações?');
+            if (confirmation) {
+                // Remove a classe 'active' de todos os números
+                const numbers = document.querySelectorAll('.bingo-number');
+                numbers.forEach(number => number.classList.remove('active'));
+                
+                // Restaura a lista de premiações
+                premiacoesLista.innerHTML = `
+                    <li>Quatro Pontas</li>
+                    <li>Quina 1</li>
+                    <li>Quina 2</li>
+                    <li>Cartela Cheia</li>
+                `;
+            }
+        });
+
+        // Função para remover item da lista de premiações ao clicar
+        premiacoesLista.addEventListener('click', function(event) {
+            if (event.target.tagName === 'LI') {
+                const confirmation = confirm('Tem certeza que deseja remover esta premiação?');
+                if (confirmation) {
+                    event.target.remove();
+                }
+            }
+        });
+
+        // Marca o número ao pressionar Enter
+        numberInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const number = parseInt(numberInput.value);
+                if (number >= 1 && number <= 75) {
+                    const bingoNumbers = document.querySelectorAll('.bingo-number');
+                    bingoNumbers.forEach(num => {
+                        if (parseInt(num.textContent) === number && !num.classList.contains('active')) {
+                            num.classList.add('active'); // Marca o número somente se não estiver marcado
+                        }
+                    });
+                    numberInput.value = ''; // Limpa o campo de entrada
+                } else {
+                    alert('Digite um número válido entre 1 e 75.');
+                }
+            }
+        });
+    </script>
+    
+</body>
+</html>
